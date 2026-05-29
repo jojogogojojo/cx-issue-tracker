@@ -1,0 +1,5 @@
+{
+  "serverRoot": ".",
+  "installRoot": ".",
+  "entryFile": "dist/main.js"
+}

@@ -17,14 +17,14 @@ import {
   urlLink,
   type Manager,
   type Message,
-} from "./channeltalk";
+} from './channeltalk';
 import {
   getIssueEvent,
   updateIssueEventTitle,
   updateIssueEventDate,
   deleteIssueEvent,
   getCalendarClient,
-} from "./google-calendar";
+} from './google-calendar';
 
 // 한국 공휴일은 그대로 보냄 (사용자 결정), 토/일만 다음 평일로 미룸
 function isWeekend(yyyyMmDd: string): boolean {

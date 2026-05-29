@@ -7,8 +7,8 @@
  *  - productManagerName: 제품팀 담당자 (팀챗 스레드 내용 기반)
  *  - followUp: 후속 안내 사항 (팀챗 스레드 보고 "고객에게 어떻게 안내해야 할지" 정리)
  */
-import { createAnthropicClient, getModel } from "./anthropic";
-import type { Manager, Message } from "./channeltalk";
+import { createAnthropicClient, getModel } from './anthropic';
+import type { Manager, Message } from './channeltalk';
 import type Anthropic from "@anthropic-ai/sdk";
 
 export interface ExtractedIssue {
