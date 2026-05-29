@@ -1,0 +1,9 @@
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Allow known non-secrets"
+paths = [
+  '''\.env\.example$''',
+  '''package-lock\.json$''',
+]
