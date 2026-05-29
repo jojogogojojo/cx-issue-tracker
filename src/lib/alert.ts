@@ -23,7 +23,8 @@ import {
   updateIssueEventTitle,
   updateIssueEventDate,
   deleteIssueEvent,
-  getCalendarClient,
+  listEventsByRange,
+  patchEventExtendedProperties,
 } from './google-calendar';
 
 // 한국 공휴일은 그대로 보냄 (사용자 결정), 토/일만 다음 평일로 미룸
@@ -95,14 +96,6 @@ export function buildAlertMessage(args: {
   return lines.join("\n");
 }
 
-// ── 캘린더 클라이언트는 google-calendar.ts의 getCalendarClient를 재사용 ──
-
-function getCalendarId(): string {
-  const id = process.env.GOOGLE_CALENDAR_ID;
-  if (!id) throw new Error("GOOGLE_CALENDAR_ID 누락");
-  return id;
-}
-
 export interface IssueEventFull {
   id: string;
   summary: string;
@@ -112,23 +105,15 @@ export interface IssueEventFull {
   extProps: Record<string, string>;
 }
 
-/** 알림이 필요한 미완료 이벤트 후보를 모두 가져옴 (오늘 ± 7일) */
+/** 알림이 필요한 미완료 이벤트 후보를 모두 가져옴 (오늘 ± daysAhead일) */
 export async function listOpenEvents(today: string, daysAhead = 14): Promise<IssueEventFull[]> {
-  const cal = getCalendarClient();
   const start = new Date(`${today}T00:00:00+09:00`);
   start.setUTCDate(start.getUTCDate() - 1); // 어제부터
   const end = new Date(`${today}T00:00:00+09:00`);
   end.setUTCDate(end.getUTCDate() + daysAhead);
-  const res = await cal.events.list({
-    calendarId: getCalendarId(),
-    timeMin: start.toISOString(),
-    timeMax: end.toISOString(),
-    timeZone: "Asia/Seoul",
-    singleEvents: true,
-    maxResults: 500,
-  });
-  return (res.data.items || [])
-    .filter((ev) => ev.id && ev.summary && ev.start?.date) // 종일 이벤트만
+  const items = await listEventsByRange(start.toISOString(), end.toISOString());
+  return items
+    .filter((ev) => ev.id && ev.summary && ev.start?.date)
     .map((ev) => ({
       id: ev.id || "",
       summary: ev.summary || "",
@@ -143,14 +128,7 @@ export async function patchEventExtProps(
   eventId: string,
   patch: Record<string, string>,
 ): Promise<void> {
-  const cal = getCalendarClient();
-  await cal.events.patch({
-    calendarId: getCalendarId(),
-    eventId,
-    requestBody: {
-      extendedProperties: { private: patch },
-    },
-  });
+  await patchEventExtendedProperties(eventId, patch);
 }
 
 // ── 답글 명령 인식 ─────────────────────────────────────────────────────────────
